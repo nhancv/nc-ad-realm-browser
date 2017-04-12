@@ -93,7 +93,15 @@ public class NRealmServer {
             if (uri.startsWith("/api")) {
                 return getInstance().getRealmController().serve(session);
             } else {
-                return newFixedLengthResponse(uri + "<br>" + "Coming soon ...");
+
+                String api = "/api<br>" +
+                        "/api?where={table_name}<br>" +
+                        "/api?where={table_name}&all<br>" +
+                        "/api?where={table_name}&field={column_name}&equal={value}<br>" +
+                        "/api?where={table_name}&field={column_name}&begin={value}<br>" +
+                        "/api?where={table_name}&field={column_name}&contains={value}<br>";
+
+                return newFixedLengthResponse("Api list: <br>" + api + "<br>");
             }
         }
 
