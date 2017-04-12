@@ -13,10 +13,12 @@ import fi.iki.elonen.NanoHTTPD;
  */
 
 public class NRealmServer {
+    private static final String TAG = NRealmServer.class.getSimpleName();
 
     private int port = 8765;
     private NRealmNanoHTTPD realmNanoHTTPD;
     private RealmController realmController;
+    private boolean enableCorns;
 
     public static NRealmServer getInstance() {
         return SingletonHelper.INSTANCE;
@@ -80,6 +82,14 @@ public class NRealmServer {
         this.realmController = realmController;
     }
 
+    public boolean isEnableCorns() {
+        return enableCorns;
+    }
+
+    public void setEnableCorns(boolean enableCorns) {
+        this.enableCorns = enableCorns;
+    }
+
     private static class NRealmNanoHTTPD extends NanoHTTPD {
 
         NRealmNanoHTTPD(String hostname, int port) {
@@ -89,20 +99,25 @@ public class NRealmServer {
         @Override
         public Response serve(IHTTPSession session) {
             String uri = session.getUri();
+            String api = "/api<br>" +
+                    "/api?where={table_name}<br>" +
+                    "/api?where={table_name}&all<br>" +
+                    "/api?where={table_name}&field={column_name}&equal={value}<br>" +
+                    "/api?where={table_name}&field={column_name}&begin={value}<br>" +
+                    "/api?where={table_name}&field={column_name}&contains={value}<br>";
+
+            Response response = newFixedLengthResponse("Api list: <br>" + api + "<br>");
 
             if (uri.startsWith("/api")) {
-                return getInstance().getRealmController().serve(session);
-            } else {
-
-                String api = "/api<br>" +
-                        "/api?where={table_name}<br>" +
-                        "/api?where={table_name}&all<br>" +
-                        "/api?where={table_name}&field={column_name}&equal={value}<br>" +
-                        "/api?where={table_name}&field={column_name}&begin={value}<br>" +
-                        "/api?where={table_name}&field={column_name}&contains={value}<br>";
-
-                return newFixedLengthResponse("Api list: <br>" + api + "<br>");
+                response = getInstance().getRealmController().serve(session);
             }
+
+            if (getInstance().isEnableCorns()) {
+                response.addHeader("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT");
+                response.addHeader("Access-Control-Allow-Origin", "*");
+                response.addHeader("Access-Control-Allow-Headers", "origin,accept,content-type,Authorization");
+            }
+            return response;
         }
 
     }

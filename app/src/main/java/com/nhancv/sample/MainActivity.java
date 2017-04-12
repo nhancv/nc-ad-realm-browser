@@ -32,17 +32,12 @@ public class MainActivity extends AppCompatActivity {
 
         genSampleRealm();
         viewSample();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         NRealmServer.start();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         NRealmServer.stop();
     }
 
@@ -55,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         Realm.setDefaultConfiguration(config);
 
         NRealmServer.init(new NRealmDiscovery(this, config));
+        NRealmServer.getInstance().setEnableCorns(true);
 
     }
 
