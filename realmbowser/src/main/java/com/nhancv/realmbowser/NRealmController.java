@@ -26,23 +26,58 @@ public class NRealmController implements RealmController {
         String uri = session.getUri();
 
         //url: /api
-        //url: /api?schema=<table_name>
-        //url: /api/query?where=<table_name>&field=<column_name>&value=<value>&action=<equalTo/....>
+        //url: /api?where=<table_name>
+        //url: /api?where=<table_name>&all
+        //url: /api?where=<table_name>&field=<column_name>&equal=<value>
+        //url: /api?where=<table_name>&field=<column_name>&begin=<value>
+        //url: /api?where=<table_name>&field=<column_name>&contains=<value>
 
         if (uri.startsWith("/api")) {
             Map<String, String> params = session.getParms();
-            String schema;
+            String response;
 
-            String table = (params.containsKey("schema")) ? params.get("schema") : null;
-            if (!TextUtils.isEmpty(table)) {
-                schema = realmDiscovery.getSchema(table);
+            String where = (params.containsKey("where")) ? params.get("where") : null;
+            if (!TextUtils.isEmpty(where)) {
+                boolean all = params.containsKey("all");
+                if (all) {
+                    //url: /api?where=<table_name>&all
+                    response = realmDiscovery.query(where);
+                } else {
+                    //url: /api?where=<table_name>&field=<column_name>&action=<value>
+
+                    //check field
+                    String field = (params.containsKey("field")) ? params.get("field") : null;
+                    //check action
+                    String equal = (params.containsKey("equal")) ? params.get("equal") : null;
+                    String begin = (params.containsKey("begin")) ? params.get("begin") : null;
+                    String contains = (params.containsKey("contains")) ? params.get("contains") : null;
+                    if (!TextUtils.isEmpty(field)) {
+                        if (!TextUtils.isEmpty(equal)) {
+                            response = realmDiscovery.query(where, field, QUERY.EQUAL, equal);
+                        } else if (!TextUtils.isEmpty(begin)) {
+                            response = realmDiscovery.query(where, field, QUERY.BEGIN, begin);
+                        } else if (!TextUtils.isEmpty(contains)) {
+                            response = realmDiscovery.query(where, field, QUERY.CONTAINS, contains);
+                        } else {
+                            response = realmDiscovery.getSchema(where);
+                        }
+                    } else {
+                        response = realmDiscovery.getSchema(where);
+                    }
+                }
             } else {
-                schema = realmDiscovery.getSchema();
+                response = realmDiscovery.getSchema();
             }
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.ACCEPTED, "application/json", schema);
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.ACCEPTED, "application/json", response);
         } else {
             return newFixedLengthResponse(uri + "<br>" + "Coming soon ...");
         }
+    }
+
+    public enum QUERY {
+        EQUAL,
+        BEGIN,
+        CONTAINS
     }
 
 }

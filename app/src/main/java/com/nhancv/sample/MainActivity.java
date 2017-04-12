@@ -15,6 +15,7 @@ import java.io.IOException;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
+import io.realm.RealmResults;
 import io.realm.RealmSchema;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(address);
         Log.e(TAG, "Server address: " + address);
 
-//        genSampleRealm();
+        genSampleRealm();
+        viewSample();
     }
 
     @Override
@@ -67,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private void genSampleRealm() {
         // Get a Realm instance for this thread
         Realm realm = Realm.getDefaultInstance();
-
         realm.beginTransaction();
+        realm.deleteAll();
         for (int i = 0; i < 10; i++) {
             User user = new User();
             user.setAge(i);
@@ -90,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
             for (String s : realmObjectSchema.getFieldNames()) {
                 Log.e(TAG, "onCreate:filed name: " + s);
             }
+        }
+        RealmResults<User> users = Realm.getDefaultInstance().where(User.class).findAll();
+        for (User user : users) {
+            Log.e(TAG, "onCreate: " + user);
         }
     }
 }
