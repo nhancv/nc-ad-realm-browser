@@ -37,7 +37,7 @@ public class NRealmServer extends NanoHTTPD {
         if (uri.startsWith("/api")) {
             return realmController.serve(session);
         } else {
-            return newFixedLengthResponse(session.getUri() + "<br>" + "Coming soon ...");
+            return newFixedLengthResponse(uri + "<br>" + "Coming soon ...");
         }
     }
 

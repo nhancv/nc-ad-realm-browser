@@ -14,6 +14,8 @@ import java.io.IOException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmObjectSchema;
+import io.realm.RealmSchema;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -27,11 +29,11 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.activity_main_tv_msg);
 
         initRealm();
+        String address = realmServer.getServerAddress(this);
+        textView.setText(address);
+        Log.e(TAG, "Server address: " + address);
 
-        Log.d(TAG, "Server address: " + realmServer.getServerAddress(this));
-        textView.setText(realmServer.getServerAddress(this));
-
-        genSampleRealm();
+//        genSampleRealm();
     }
 
     @Override
@@ -79,5 +81,15 @@ public class MainActivity extends AppCompatActivity {
         }
         realm.commitTransaction();
 
+    }
+
+    private void viewSample() {
+        RealmSchema schema = Realm.getDefaultInstance().getSchema();
+        for (RealmObjectSchema realmObjectSchema : schema.getAll()) {
+            Log.e(TAG, "RealmSchema: " + realmObjectSchema.getClassName());
+            for (String s : realmObjectSchema.getFieldNames()) {
+                Log.e(TAG, "onCreate:filed name: " + s);
+            }
+        }
     }
 }

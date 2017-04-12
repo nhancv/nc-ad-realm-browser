@@ -9,6 +9,7 @@ import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
  */
 
 public class NRealmController implements RealmController {
+    private static final String TAG = NRealmController.class.getSimpleName();
 
     private NRealmDiscovery realmDiscovery;
 
@@ -18,7 +19,14 @@ public class NRealmController implements RealmController {
 
     @Override
     public NanoHTTPD.Response serve(NanoHTTPD.IHTTPSession session) {
-        return newFixedLengthResponse(NanoHTTPD.Response.Status.ACCEPTED, "application/json", "{\"data\": null}");
+        String uri = session.getUri();
+
+        if (uri.startsWith("/api")) {
+            String schema = realmDiscovery.getSchemas();
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.ACCEPTED, "application/json", schema);
+        } else {
+            return newFixedLengthResponse(uri + "<br>" + "Coming soon ...");
+        }
     }
 
 }
