@@ -10,8 +10,6 @@ import com.nhancv.realmbowser.NRealmServer;
 import com.nhancv.sample.model.Person;
 import com.nhancv.sample.model.User;
 
-import java.io.IOException;
-
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObjectSchema;
@@ -21,8 +19,6 @@ import io.realm.RealmSchema;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private NRealmServer realmServer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.activity_main_tv_msg);
 
         initRealm();
-        String address = realmServer.getServerAddress(this);
+        String address = NRealmServer.getServerAddress(this);
         textView.setText(address);
         Log.e(TAG, "Server address: " + address);
 
@@ -41,17 +37,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        try {
-            realmServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        NRealmServer.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        realmServer.stop();
+        NRealmServer.stop();
     }
 
     private void initRealm() {
@@ -62,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         Realm.setDefaultConfiguration(config);
 
-        realmServer = new NRealmServer(new NRealmDiscovery(this, config));
+        NRealmServer.init(new NRealmDiscovery(this, config));
 
     }
 

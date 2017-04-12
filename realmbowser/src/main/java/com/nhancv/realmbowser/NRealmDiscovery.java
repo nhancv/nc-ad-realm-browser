@@ -26,7 +26,7 @@ import io.realm.RealmSchema;
  * Created by nhancao on 4/12/17.
  */
 
-public class NRealmDiscovery {
+public class NRealmDiscovery implements RealmDiscovery {
     private static final String TAG = NRealmDiscovery.class.getSimpleName();
 
     public NRealmDiscovery(Context context, RealmConfiguration realmConfiguration) {
@@ -34,6 +34,7 @@ public class NRealmDiscovery {
         Realm.setDefaultConfiguration(realmConfiguration);
     }
 
+    @Override
     public String getSchema() {
         Realm realm = Realm.getDefaultInstance();
 
@@ -58,6 +59,7 @@ public class NRealmDiscovery {
         return toJson(schemaList);
     }
 
+    @Override
     public String getSchema(String tableName) {
 
         try {
@@ -92,6 +94,88 @@ public class NRealmDiscovery {
         }
     }
 
+    @Override
+    public String query(String where) {
+
+        try {
+            Realm realm = Realm.getDefaultInstance();
+            DynamicRealm dynamicRealm = DynamicRealm.getInstance(realm.getConfiguration());
+            Set<Class<? extends RealmModel>> modelClasses = realm.getConfiguration().getRealmObjectClasses();
+            Class<? extends RealmModel> modelModel = null;
+            for (Class<? extends RealmModel> modelClass : modelClasses) {
+                if (modelClass.getSimpleName().equals(where)) {
+                    modelModel = modelClass;
+                    break;
+                }
+            }
+
+            if (modelModel != null) {
+                RealmSchema schema = dynamicRealm.getSchema();
+                RealmObjectSchema realmObjectSchema = schema.get(modelModel.getSimpleName());
+
+                List<String> columns = new ArrayList<>(realmObjectSchema.getFieldNames());
+
+                RealmFieldType[] realmFieldTypes = new RealmFieldType[columns.size()];
+                int index = 0;
+                for (String fieldName : columns) {
+                    realmFieldTypes[index] = realmObjectSchema.getFieldType(fieldName);
+                    index++;
+                }
+                RealmQuery<DynamicRealmObject> realmQuery = dynamicRealm.where(modelModel.getSimpleName());
+                RealmResults<DynamicRealmObject> realmResults = realmQuery.findAll();
+                int totalSize = realmResults.size();
+
+                List<List<Object>> rows = new ArrayList<>();
+                for (int i = 0; i < totalSize; i++) {
+                    DynamicRealmObject dynamicRealmObject = realmResults.get(i);
+                    List<Object> rowData = new ArrayList<>();
+                    for (int j = 0; j < columns.size(); j++) {
+                        String columnName = columns.get(j);
+                        Object res = null;
+                        switch (realmFieldTypes[j]) {
+                            case INTEGER:
+                                res = dynamicRealmObject.getLong(columnName);
+                                break;
+                            case BOOLEAN:
+                                res = dynamicRealmObject.getBoolean(columnName);
+                                break;
+                            case FLOAT:
+                                res = dynamicRealmObject.getFloat(columnName);
+                                break;
+                            case DOUBLE:
+                                res = dynamicRealmObject.getDouble(columnName);
+                                break;
+                            case DATE:
+                                res = dynamicRealmObject.getDate(columnName).toString();
+                                break;
+                            case STRING:
+                                res = dynamicRealmObject.getString(columnName);
+                                break;
+                        }
+                        rowData.add(res);
+                    }
+                    rows.add(rowData);
+                }
+                realm.close();
+
+                for (int i = 0; i < columns.size(); i++) {
+                    String column = columns.get(i);
+                    column = column + " (" + realmFieldTypes[i] + ")";
+                    columns.set(i, column);
+                }
+
+                SchemaData schemaData = new SchemaData(columns, rows, totalSize);
+                return toJson(schemaData);
+
+            } else {
+                throw new ClassNotFoundException("ClassNotFoundException");
+            }
+        } catch (ClassNotFoundException e) {
+            return toJson(e);
+        }
+    }
+
+    @Override
     public String query(String where, String field, NRealmController.QUERY action, String value) {
 
         try {
@@ -239,90 +323,6 @@ public class NRealmDiscovery {
         } catch (ClassNotFoundException e) {
             return toJson(e);
         }
-    }
-
-    public String query(String where) {
-
-        try {
-            Realm realm = Realm.getDefaultInstance();
-            DynamicRealm dynamicRealm = DynamicRealm.getInstance(realm.getConfiguration());
-            Set<Class<? extends RealmModel>> modelClasses = realm.getConfiguration().getRealmObjectClasses();
-            Class<? extends RealmModel> modelModel = null;
-            for (Class<? extends RealmModel> modelClass : modelClasses) {
-                if (modelClass.getSimpleName().equals(where)) {
-                    modelModel = modelClass;
-                    break;
-                }
-            }
-
-            if (modelModel != null) {
-                RealmSchema schema = dynamicRealm.getSchema();
-                RealmObjectSchema realmObjectSchema = schema.get(modelModel.getSimpleName());
-
-                List<String> columns = new ArrayList<>(realmObjectSchema.getFieldNames());
-
-                RealmFieldType[] realmFieldTypes = new RealmFieldType[columns.size()];
-                int index = 0;
-                for (String fieldName : columns) {
-                    realmFieldTypes[index] = realmObjectSchema.getFieldType(fieldName);
-                    index++;
-                }
-                RealmQuery<DynamicRealmObject> realmQuery = dynamicRealm.where(modelModel.getSimpleName());
-                RealmResults<DynamicRealmObject> realmResults = realmQuery.findAll();
-                int totalSize = realmResults.size();
-
-                List<List<Object>> rows = new ArrayList<>();
-                for (int i = 0; i < totalSize; i++) {
-                    DynamicRealmObject dynamicRealmObject = realmResults.get(i);
-                    List<Object> rowData = new ArrayList<>();
-                    for (int j = 0; j < columns.size(); j++) {
-                        String columnName = columns.get(j);
-                        Object res = null;
-                        switch (realmFieldTypes[j]) {
-                            case INTEGER:
-                                res = dynamicRealmObject.getLong(columnName);
-                                break;
-                            case BOOLEAN:
-                                res = dynamicRealmObject.getBoolean(columnName);
-                                break;
-                            case FLOAT:
-                                res = dynamicRealmObject.getFloat(columnName);
-                                break;
-                            case DOUBLE:
-                                res = dynamicRealmObject.getDouble(columnName);
-                                break;
-                            case DATE:
-                                res = dynamicRealmObject.getDate(columnName).toString();
-                                break;
-                            case STRING:
-                                res = dynamicRealmObject.getString(columnName);
-                                break;
-                        }
-                        rowData.add(res);
-                    }
-                    rows.add(rowData);
-                }
-                realm.close();
-
-                for (int i = 0; i < columns.size(); i++) {
-                    String column = columns.get(i);
-                    column = column + " (" + realmFieldTypes[i] + ")";
-                    columns.set(i, column);
-                }
-
-                SchemaData schemaData = new SchemaData(columns, rows, totalSize);
-                return toJson(schemaData);
-
-            } else {
-                throw new ClassNotFoundException("ClassNotFoundException");
-            }
-        } catch (ClassNotFoundException e) {
-            return toJson(e);
-        }
-    }
-
-    public String defaultReturn() {
-        return toJson(null);
     }
 
     public <T> String toJson(T data) {
