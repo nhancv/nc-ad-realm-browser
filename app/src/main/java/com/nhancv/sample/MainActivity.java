@@ -5,9 +5,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.nhancv.realmbowser.NRealmDiscovery;
 import com.nhancv.realmbowser.NRealmServer;
+import com.nhancv.sample.model.Person;
+import com.nhancv.sample.model.User;
 
 import java.io.IOException;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -19,9 +25,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         TextView textView = (TextView) findViewById(R.id.activity_main_tv_msg);
-        realmServer = new NRealmServer();
+
+        initRealm();
+
         Log.d(TAG, "Server address: " + realmServer.getServerAddress(this));
         textView.setText(realmServer.getServerAddress(this));
+
+        genSampleRealm();
     }
 
     @Override
@@ -38,5 +48,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         realmServer.stop();
+    }
+
+    private void initRealm() {
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .schemaVersion(0)
+                .build();
+        Realm.setDefaultConfiguration(config);
+
+        realmServer = new NRealmServer(new NRealmDiscovery(this, config));
+
+    }
+
+    private void genSampleRealm() {
+        // Get a Realm instance for this thread
+        Realm realm = Realm.getDefaultInstance();
+
+        realm.beginTransaction();
+        for (int i = 0; i < 10; i++) {
+            User user = new User();
+            user.setAge(i);
+            user.setName("User-" + i);
+
+            Person person = new Person();
+            person.setName("Person-" + i);
+            realm.copyToRealm(user);
+            realm.copyToRealm(person);
+        }
+        realm.commitTransaction();
+
     }
 }

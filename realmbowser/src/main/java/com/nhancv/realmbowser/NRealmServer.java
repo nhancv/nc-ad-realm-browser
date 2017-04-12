@@ -14,23 +14,31 @@ import fi.iki.elonen.NanoHTTPD;
 public class NRealmServer extends NanoHTTPD {
 
     private int port = 8765;
+    private RealmController realmController;
 
-    public NRealmServer() {
-        this(8765);
+    public NRealmServer(NRealmDiscovery realmDiscovery) {
+        this(8765, realmDiscovery);
     }
 
-    public NRealmServer(int port) {
-        this(null, port);
+    public NRealmServer(int port, NRealmDiscovery realmDiscovery) {
+        this(null, port, realmDiscovery);
     }
 
-    public NRealmServer(String hostname, int port) {
+    public NRealmServer(String hostname, int port, NRealmDiscovery realmDiscovery) {
         super(hostname, port);
         this.port = port;
+        this.realmController = new NRealmController(realmDiscovery);
     }
 
     @Override
     public Response serve(IHTTPSession session) {
-        return newFixedLengthResponse("Hello word!");
+        String uri = session.getUri();
+
+        if (uri.startsWith("/api")) {
+            return realmController.serve(session);
+        } else {
+            return newFixedLengthResponse(session.getUri() + "<br>" + "Coming soon ...");
+        }
     }
 
     public String getServerAddress(Context context) {
