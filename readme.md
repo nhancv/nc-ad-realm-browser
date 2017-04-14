@@ -17,6 +17,10 @@ https://jitpack.io/#nhancv/nc-android-realm-browser
 ```
 
 # Usage
+
+*Compatible with Realm 3.1.1*
+
+
 ```java
 Realm.init(this);
 RealmConfiguration config = new RealmConfiguration.Builder()
@@ -64,8 +68,8 @@ Get schema info
 `http://192.168.1.49:8765/api`
 
 # Screenshot
-<img src="screenshots/api.png" width="410" height="412">
+<img src="screenshots/api.png" width="450" height="452">
 <br>
-<img src="screenshots/memory.png" width="410" height="176">
+<img src="screenshots/memory.png" width="450" height="216">
 <br>
-<img src="screenshots/realm-browser.gif" width="700" height="384">
+<img src="screenshots/realm-browser.gif" width="800" height="484">
