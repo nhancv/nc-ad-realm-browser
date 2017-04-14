@@ -64,6 +64,8 @@ Get schema info
 `http://192.168.1.49:8765/api`
 
 # Screenshot
-<img src="screenshots/api.png" width="400" height="402">
+<img src="screenshots/api.png" width="410" height="412">
 <br>
-<img src="screenshots/memory.png" width="400" height="166">
+<img src="screenshots/memory.png" width="410" height="176">
+<br>
+<img src="screenshots/realm-browser.gif" width="700" height="384">

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="utf-8">
+    <title>Realm Browser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+        .row.content {
+            height: 680px
+        }
+
+        /* Set gray background color and 100% height */
+        .sidenav {
+            background-color: #f1f1f1;
+            height: 100%;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+            .sidenav {
+                height: auto;
+                padding: 15px;
+            }
+
+            .row.content {
+                height: auto;
+            }
+        }
+
+
+    </style>
+</head>
+<body ng-controller="myCtrl">
+
+<div class="container-fluid">
+    <div class="row content">
+        <div class="col-sm-3 sidenav">
+            <h4>Tables - <a href="/api/list" target="_blank">ApiList</a></h4>
+            <div class="input-group">
+                <input type="text" class="form-control" ng-model="searchTable" placeholder="Search table...">
+                <span class="input-group-btn">
+                  <button disabled class="btn btn-default" type="button">
+                    <span class="glyphicon glyphicon-search"></span>
+                  </button>
+                </span>
+            </div>
+            <hr>
+            <ul class="nav nav-pills nav-stacked">
+                <li ng-repeat="table in tables | filter: searchTable" ng-class="activeTable==$index ? 'active':''"
+                    style="cursor:pointer"><a ng-click="tableClick($index)">{{table.name}}</a>
+                </li>
+            </ul>
+            <br>
+
+        </div>
+
+        <div class="col-sm-9">
+            <h4>
+                <div ng-show="!isShowHome" class="input-group">
+                    <span class="input-group-addon">
+                        Query:
+                    </span>
+                    <input type="text" class="form-control" ng-model="query.field"
+                           ng-model-options="{ debounce: 200 }"
+                           ng-change="doQuery()"
+                           placeholder="Column name">
+                    <span style="font-size: 14px; padding: 10px;">
+                    <label class="radio-inline"><input style="margin-bottom: 0; margin-top: 0;" type="radio"
+                                                       name="optradio" ng-model="query.action"
+                                                       ng-change="doQuery()"
+                                                       ng-value="0">equal</label>
+                    <label class="radio-inline"><input style="margin-bottom: 0; margin-top: 0;" type="radio"
+                                                       name="optradio" ng-model="query.action"
+                                                       ng-change="doQuery()"
+                                                       ng-value="1">begin</label>
+                    <label class="radio-inline"><input style="margin-bottom: 0; margin-top: 0;" type="radio"
+                                                       name="optradio" ng-model="query.action"
+                                                       ng-change="doQuery()"
+                                                       ng-value="2">contains</label>
+                    </span>
+                    <input type="text" class="form-control" ng-model="query.value"
+                           ng-model-options="{ debounce: 200 }"
+                           ng-change="doQuery()"
+                           placeholder="value">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-btn">
+                      <button disabled class="btn btn-default" type="button">
+                        <span class="glyphicon glyphicon-search"></span>
+                      </button>
+                    </span>
+                    <input type="text" class="form-control" ng-model="searchData"
+                           ng-model-options="{ debounce: 200 }"
+                           placeholder="Search data...">
+                </div>
+
+            </h4>
+            <hr>
+            <div id="TableHome" ng-if="isShowHome" style="height:540px; overflow: scroll">
+                <table ng-repeat="table in tables | filter: isShowHome && searchData"
+                       class="table table-hover table-striped"
+                       style="width: auto; min-width: 300px; display: inline-table">
+                    <thead>
+                    <tr colspan="2">
+                        <td>{{table.name}}</td>
+                    </tr>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in table.structures">
+                        <td>{{row.property}}</td>
+                        <td>{{row.type}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="TableDetails" ng-if="!isShowHome" style="height:440px; overflow: scroll">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th ng-repeat="col in tableDetails.columns">{{col}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in tableDetails.rows | filter: !isShowHome && searchData">
+                        <td ng-repeat="item in row">{{item}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="container-fluid">
+    <p>@Nhan Cao</p>
+</footer>
+
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('myCtrl', function ($scope, $http, myService) {
+        var host = "-----[HOSTNAME:PORT]------";
+
+        $scope.tables = [];
+        $scope.tableDetails = [];
+        $scope.tableDetailsOriginal = [];
+        $scope.isShowHome = true;
+        myService
+            .httpPromise(host + "/api")
+            .then(function (response) {
+                $scope.tables = response.data;
+            });
+
+        $scope.activeTable = -1;
+
+        $scope.query = {
+            field: null,
+            action: 0,
+            value: null
+        };
+
+        $scope.doQuery = function () {
+            if ($scope.query.field != '' && $scope.query.field != null && $scope.query.field != undefined &&
+                $scope.query.value != '' && $scope.query.value != null && $scope.query.value != undefined) {
+
+                var action = $scope.query.action == 0 ? "equal" : $scope.query.action == 1 ? "begin" : "contains";
+
+                myService
+                    .httpPromise(host + "/api?where=" + $scope.tables[$scope.activeTable].name
+                        + "&field=" + $scope.query.field
+                        + "&" + action + "=" + $scope.query.value)
+                    .then(function (response) {
+                        $scope.tableDetails = response.data;
+                    });
+            } else {
+                $scope.tableDetails = $scope.tableDetailsOriginal;
+                console.log("Query field, value not null");
+            }
+
+        };
+
+        $scope.tableClick = function ($index) {
+            if ($scope.activeTable == $index) {
+                $scope.activeTable = -1;
+                $scope.isShowHome = true;
+            } else {
+                $scope.activeTable = $index;
+                $scope.isShowHome = false;
+
+                myService
+                    .httpPromise(host + "/api?where=" + $scope.tables[$index].name + "&all")
+                    .then(function (response) {
+                        $scope.tableDetailsOriginal = response.data;
+                        $scope.tableDetails = response.data;
+                    });
+            }
+        }
+
+    });
+
+    app.service('myService', function ($http, $q) {
+        this.httpPromise = function (url) {
+            var defer = $q.defer();
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8'
+                }
+            };
+
+            $http(req).then(function (response) {
+                if (typeof response.data === 'object') {
+                    defer.resolve(response.data);
+                } else {
+                    defer.reject(response.data);
+                }
+            }, function (error) {
+                defer.reject(error);
+            });
+
+            return defer.promise;
+        };
+
+    });
+
+
+</script>
+
+</body>
+</html>

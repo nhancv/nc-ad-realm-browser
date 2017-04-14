@@ -98,18 +98,24 @@ public class NRealmServer {
 
         @Override
         public Response serve(IHTTPSession session) {
+
             String uri = session.getUri();
-            String api = "/api<br>" +
-                    "/api?where={table_name}<br>" +
-                    "/api?where={table_name}&all<br>" +
-                    "/api?where={table_name}&field={column_name}&equal={value}<br>" +
-                    "/api?where={table_name}&field={column_name}&begin={value}<br>" +
-                    "/api?where={table_name}&field={column_name}&contains={value}<br>";
+            String apiList = "/api<br>" +
+                             "/api?where={table_name}<br>" +
+                             "/api?where={table_name}&all<br>" +
+                             "/api?where={table_name}&field={column_name}&equal={value}<br>" +
+                             "/api?where={table_name}&field={column_name}&begin={value}<br>" +
+                             "/api?where={table_name}&field={column_name}&contains={value}<br>";
 
-            Response response = newFixedLengthResponse("Api list: <br>" + api + "<br>");
+            String homePage = HomePage.content.replace("-----[HOSTNAME:PORT]------", "");
 
-            if (uri.startsWith("/api")) {
+            Response response;
+            if (uri.startsWith("/api/list")) {
+                response = newFixedLengthResponse("Api list: <br>" + apiList + "<br>");
+            } else if (uri.startsWith("/api")) {
                 response = getInstance().getRealmController().serve(session);
+            } else {
+                response = newFixedLengthResponse(homePage);
             }
 
             if (getInstance().isEnableCorns()) {
