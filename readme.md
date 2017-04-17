@@ -18,7 +18,16 @@ https://jitpack.io/#nhancv/nc-android-realm-browser
 
 # Usage
 
-*Compatible with Realm 3.1.1*
+*Compatible with Realm 3.1.2*
+
+To avoid `NullPointer in ServerRunnable`
+https://github.com/NanoHttpd/nanohttpd/issues/270
+
+fix -> disable Splunk Mint network monitoring:
+```java
+Mint.disableNetworkMonitoring();
+Mint.initAndStartSession(<Context>, "YOUR_API_KEY");
+```
 
 
 ```java

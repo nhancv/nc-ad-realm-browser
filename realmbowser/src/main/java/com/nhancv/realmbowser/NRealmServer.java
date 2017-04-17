@@ -3,7 +3,6 @@ package com.nhancv.realmbowser;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -38,23 +37,32 @@ public class NRealmServer {
         getInstance().setRealmNanoHTTPD(new NRealmNanoHTTPD(hostName, port));
     }
 
-    public static void start() {
+    public static boolean start() {
         try {
             getInstance().getRealmNanoHTTPD().start();
-        } catch (IOException e) {
+            return true;
+        } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    public static void stop() {
-        getInstance().getRealmNanoHTTPD().stop();
+    public static boolean stop() {
+        try {
+            getInstance().getRealmNanoHTTPD().stop();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static String getServerAddress(Context context) {
         WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
-        final String formatedIpAddress = String.format(Locale.US, "%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
-                (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
+        final String formatedIpAddress = String
+                .format(Locale.US, "%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff),
+                        (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
         return "http://" + formatedIpAddress + ":" + getInstance().getPort();
     }
 
