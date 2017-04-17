@@ -47,6 +47,12 @@ public class NRealmServer {
         }
     }
 
+    public static boolean isStart() {
+        return getInstance() != null &&
+               getInstance().getRealmNanoHTTPD() != null &&
+               getInstance().getRealmNanoHTTPD().isAlive();
+    }
+
     public static boolean stop() {
         try {
             getInstance().getRealmNanoHTTPD().stop();
