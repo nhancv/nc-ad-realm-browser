@@ -15,6 +15,8 @@ https://jitpack.io/#nhancv/nc-android-realm-browser
 	        compile 'com.github.nhancv:nc-android-realm-browser:${version}'
 	}
 ```
+# Limit
+- Not support RealmList completely yet.
 
 # Usage
 
