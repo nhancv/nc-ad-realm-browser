@@ -12,6 +12,7 @@ import com.nhancv.sample.model.User;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmResults;
 import io.realm.RealmSchema;
@@ -61,13 +62,19 @@ public class MainActivity extends AppCompatActivity {
         realm.deleteAll();
         for (int i = 0; i < 10; i++) {
             User user = new User();
+            user.setId(i);
             user.setAge(i);
             user.setName("User-" + i);
 
-            Person person = new Person();
-            person.setName("Person-" + i);
-            realm.copyToRealm(user);
-            realm.copyToRealm(person);
+            RealmList<Person> personList = new RealmList<>();
+            for (int j = 0; j < 10; j++) {
+                Person person = new Person();
+                person.setId(j);
+                person.setName(String.format("Person-%s.%s", i, j));
+                personList.add(person);
+            }
+            user.setPersonList(personList);
+            realm.insertOrUpdate(user);
         }
         realm.commitTransaction();
 
