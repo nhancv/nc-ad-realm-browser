@@ -42,8 +42,6 @@
             }
         }
 
-
-
     </style>
 </head>
 <body ng-controller="myCtrl">
@@ -62,7 +60,8 @@
             </div>
             <hr>
             <ul class="nav nav-pills nav-stacked" style="height: 566px;overflow: scroll;">
-                <li ng-repeat="table in tables | filter: searchTable" ng-class="activeTable==$index ? 'active':''"
+                <li ng-repeat="table in tables | filter: searchTable track by $index"
+                    ng-class="activeTable==$index ? 'active':''"
                     style="cursor:pointer"><a ng-click="tableClick($index)">{{table.name}}</a>
                 </li>
             </ul>
@@ -114,7 +113,7 @@
             </h4>
             <hr>
             <div id="TableHome" ng-if="isShowHome" style="height:540px; overflow: scroll">
-                <table ng-repeat="table in tables | filter: isShowHome && searchData"
+                <table ng-repeat="table in tables | filter: isShowHome && searchData track by $index"
                        class="table table-hover table-striped"
                        style="width: auto; min-width: 300px; display: inline-table">
                     <thead>
@@ -127,7 +126,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in table.structures">
+                    <tr ng-repeat="row in table.structures track by $index">
                         <td>{{row.property}}</td>
                         <td>{{row.type}}</td>
                     </tr>
@@ -139,12 +138,12 @@
                 <table class="table table-hover table-striped table-bordered">
                     <thead>
                     <tr>
-                        <th ng-repeat="col in tableDetails.columns">{{col}}</th>
+                        <th ng-repeat="col in tableDetails.columns track by $index">{{col}}</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="row in tableDetails.rows | filter: !isShowHome && searchData">
-                        <td ng-repeat="item in row">{{item}}</td>
+                    <tr ng-repeat="row in tableDetails.rows | filter: !isShowHome && searchData track by $index">
+                        <td ng-repeat="item in row track by $index">{{item}}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -246,8 +245,6 @@
         };
 
     });
-
-
 
 </script>
 
