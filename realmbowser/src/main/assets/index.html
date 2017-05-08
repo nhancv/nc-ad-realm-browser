@@ -61,7 +61,7 @@
                 </span>
             </div>
             <hr>
-            <ul class="nav nav-pills nav-stacked">
+            <ul class="nav nav-pills nav-stacked" style="height: 566px;overflow: scroll;">
                 <li ng-repeat="table in tables | filter: searchTable" ng-class="activeTable==$index ? 'active':''"
                     style="cursor:pointer"><a ng-click="tableClick($index)">{{table.name}}</a>
                 </li>
