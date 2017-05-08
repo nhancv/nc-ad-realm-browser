@@ -1,5 +1,5 @@
 # Installation
-https://jitpack.io/#nhancv/nc-android-realm-browser
+[![](https://jitpack.io/v/nhancv/nc-android-realm-browser.svg)](https://jitpack.io/#nhancv/nc-android-realm-browser)
 ```
 1. Add it in your root build.gradle at the end of repositories:
 	allprojects {
