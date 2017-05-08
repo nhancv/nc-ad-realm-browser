@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         Realm.setDefaultConfiguration(config);
 
         NRealmServer.init(new NRealmDiscovery(this, config));
-        //NRealmServer.getInstance().setEnableCorns(true);
+        NRealmServer.getInstance().setEnableCorns(true);
 
     }
 

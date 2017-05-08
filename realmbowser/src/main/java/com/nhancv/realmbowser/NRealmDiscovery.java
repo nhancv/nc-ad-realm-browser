@@ -28,10 +28,16 @@ import io.realm.RealmSchema;
 
 public class NRealmDiscovery implements RealmDiscovery {
     private static final String TAG = NRealmDiscovery.class.getSimpleName();
+    private Context context;
 
     public NRealmDiscovery(Context context, RealmConfiguration realmConfiguration) {
+        this.context = context;
         Realm.init(context);
         Realm.setDefaultConfiguration(realmConfiguration);
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     @Override

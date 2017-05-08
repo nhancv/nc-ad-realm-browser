@@ -35,6 +35,12 @@ public class NRealmServer {
         getInstance().setPort(port);
         getInstance().setRealmController(new NRealmController(realmDiscovery));
         getInstance().setRealmNanoHTTPD(new NRealmNanoHTTPD(hostName, port));
+
+        //Build content
+        HomePage.buildContent(realmDiscovery.getContext());
+
+
+
     }
 
     public static boolean start() {
