@@ -8,6 +8,8 @@ import com.nhancv.realmbowser.model.Schema;
 import com.nhancv.realmbowser.model.SchemaData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -61,6 +63,17 @@ public class NRealmDiscovery implements RealmDiscovery {
                     structures.add(structure);
                 }
                 schemaList.add(new Schema(modelClass.getSimpleName(), structures));
+            }
+            if (schemaList.size() > 0) {
+                Collections.sort(schemaList, new Comparator<Schema>() {
+                    @Override
+                    public int compare(Schema o1, Schema o2) {
+                        String str1 = o1.getName();
+                        String str2 = o2.getName();
+                        int res = String.CASE_INSENSITIVE_ORDER.compare(str1, str2);
+                        return (res != 0) ? res : str1.compareTo(str2);
+                    }
+                });
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,7 +161,7 @@ public class NRealmDiscovery implements RealmDiscovery {
                         List<Object> rowData = new ArrayList<>();
                         for (int j = 0; j < columns.size(); j++) {
                             String columnName = columns.get(j);
-                            Object res = null;
+                            Object res;
                             switch (realmFieldTypes[j]) {
                                 case INTEGER:
                                     res = dynamicRealmObject.getLong(columnName);
@@ -167,6 +180,12 @@ public class NRealmDiscovery implements RealmDiscovery {
                                     break;
                                 case STRING:
                                     res = dynamicRealmObject.getString(columnName);
+                                    break;
+                                case LIST:
+                                    res = String.format("Size(%s)", dynamicRealmObject.getList(columnName).size());
+                                    break;
+                                default:
+                                    res = "n/a";
                                     break;
                             }
                             rowData.add(res);
@@ -280,7 +299,7 @@ public class NRealmDiscovery implements RealmDiscovery {
                                     break;
                             }
                             break;
-                        case STRING:
+                        default:
                             switch (action) {
                                 case EQUAL:
                                     realmQuery.equalTo(field, value);
@@ -303,7 +322,7 @@ public class NRealmDiscovery implements RealmDiscovery {
                         List<Object> rowData = new ArrayList<>();
                         for (int j = 0; j < columns.size(); j++) {
                             String columnName = columns.get(j);
-                            Object res = null;
+                            Object res;
                             switch (realmFieldTypes[j]) {
                                 case INTEGER:
                                     res = dynamicRealmObject.getLong(columnName);
@@ -322,6 +341,12 @@ public class NRealmDiscovery implements RealmDiscovery {
                                     break;
                                 case STRING:
                                     res = dynamicRealmObject.getString(columnName);
+                                    break;
+                                case LIST:
+                                    res = String.format("Size(%s)", dynamicRealmObject.getList(columnName).size());
+                                    break;
+                                default:
+                                    res = "n/a";
                                     break;
                             }
                             rowData.add(res);
