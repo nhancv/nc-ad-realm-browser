@@ -8,11 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 121
-        versionName "1.2.2"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        versionCode 123
+        versionName "1.2.3"
     }
     buildTypes {
         release {
@@ -24,10 +21,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testCompile 'junit:junit:4.12'
     compile 'org.nanohttpd:nanohttpd:2.2.0'
     compile 'com.google.code.gson:gson:2.8.0'
 }
